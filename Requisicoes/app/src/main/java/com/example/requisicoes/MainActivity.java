@@ -7,6 +7,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.example.requisicoes.api.CepService;
+import com.example.requisicoes.model.CEP;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -18,10 +21,17 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
 public class MainActivity extends AppCompatActivity {
 
     private Button botaoRecuperar;
     private TextView textoResultado;
+    private  Retrofit retrofit;
 
 
     @Override
@@ -32,95 +42,41 @@ public class MainActivity extends AppCompatActivity {
         botaoRecuperar = findViewById(R.id.button_recuperar);
         textoResultado = findViewById(R.id.textResultado);
 
+        retrofit = new Retrofit.Builder()
+                .baseUrl("https://viacep.com.br/ws/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
         botaoRecuperar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MyTask task = new MyTask();
-
-                String UrlApi = "https://www.blockchain.com/ticker";
-                String cep = "03421000";
-                String urlCep = "https://viacep.com.br/ws/"+ cep +"/json";
-                task.execute(urlCep);
-
+                recuperarCepRetrofit();
             }
         });
 
     }
 
-    class MyTask extends AsyncTask<String,Void, String>{
+    private void recuperarCepRetrofit() {
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
+        CepService cepService = retrofit.create ( CepService.class );
+        Call<CEP> call = cepService.recuperarCep("03421000");
 
-        @Override
-        protected String doInBackground(String... strings) {
+        call.enqueue(new Callback<CEP>() {
+            @Override
+            public void onResponse(Call<CEP> call, Response<CEP> response) {
 
-            String stringUrl = strings[0];
-            InputStream inputStream=null;
-            InputStreamReader inputStreamReader = null;
-            StringBuffer buffer = null;
-
-            try {
-                URL url = new URL(stringUrl);
-                HttpURLConnection conexao = (HttpURLConnection) url.openConnection();
-
-                //Recupera os dados em Bytes
-                inputStream = conexao.getInputStream();
-
-                //Lê os dados em Bytes e decodifica para caracteree
-                inputStreamReader = new InputStreamReader(inputStream);
-
-                //Objeto utilizado para leitura dos caracteres di InputStreamReader
-                BufferedReader reader = new BufferedReader(inputStreamReader);
-                buffer = new StringBuffer();
-                String linha = "";
-
-                while ( (linha = reader.readLine()) !=null){
-                    buffer.append(linha);
+                if( response.isSuccessful()){
+                    CEP cep = response.body();
+                    textoResultado.setText( cep.getLogradouro()+" / "+cep.getComplemento()+" / "+
+                                            cep.getBairro()+" / "+cep.getLocalidade()+" / "+cep.getUf());
                 }
-
-
-
-
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-
-            }
-            return buffer.toString();
-        }
-
-        @Override
-        protected void onPostExecute(String resultado) {
-            super.onPostExecute(resultado);
-
-            String logradouro =null;
-            String cep =null;
-            String complemento =null;
-            String bairro =null;
-            String localidade =null;
-            String uf =null;
-
-
-
-            try {
-                JSONObject jsonObject = new JSONObject(resultado);
-                logradouro = jsonObject.getString("logradouro");
-                cep = jsonObject.getString("cep");
-                complemento = jsonObject.getString("complemento");
-                bairro = jsonObject.getString("bairro");
-                localidade = jsonObject.getString("localidade");
-                uf = jsonObject.getString("uf");
-
-
-            } catch (JSONException e) {
-                e.printStackTrace();
             }
 
-            textoResultado.setText( logradouro+" / "+cep+" / "+complemento+" / "+bairro+" / "+localidade+" / "+uf);
+            @Override
+            public void onFailure(Call<CEP> call, Throwable t) {
 
-        }
+            }
+        });
     }
+
 }
