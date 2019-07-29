@@ -1,25 +1,17 @@
 package com.example.requisicoes;
 
-import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.example.requisicoes.api.CepService;
-import com.example.requisicoes.model.CEP;
+import com.example.requisicoes.api.DataService;
+import com.example.requisicoes.model.Fotos;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -31,8 +23,8 @@ public class MainActivity extends AppCompatActivity {
 
     private Button botaoRecuperar;
     private TextView textoResultado;
-    private TextView cepInputText;
     private  Retrofit retrofit;
+    private List<Fotos> listaDeFotos = new ArrayList<>();
 
 
     @Override
@@ -42,44 +34,44 @@ public class MainActivity extends AppCompatActivity {
 
         botaoRecuperar = findViewById(R.id.button_recuperar);
         textoResultado = findViewById(R.id.textResultado);
-        cepInputText = findViewById(R.id.cep_input_edit_text_id);
 
         retrofit = new Retrofit.Builder()
-                .baseUrl("https://viacep.com.br/ws/")
+                .baseUrl("https://jsonplaceholder.typicode.com")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
         botaoRecuperar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                recuperarCepRetrofit();
+                recuperarListaRetrofit();
             }
         });
 
     }
 
-    private void recuperarCepRetrofit() {
+    private void recuperarListaRetrofit() {
 
-        String cep = cepInputText.getText().toString();
-        CepService cepService = retrofit.create ( CepService.class );
-        Call<CEP> call = cepService.recuperarCep(cep);
+        DataService service = retrofit.create(DataService.class);
+        Call<List<Fotos>> call = service.recuperarFotos();
 
-        call.enqueue(new Callback<CEP>() {
+        call.enqueue(new Callback<List<Fotos>>() {
             @Override
-            public void onResponse(Call<CEP> call, Response<CEP> response) {
+            public void onResponse(Call<List<Fotos>> call, Response<List<Fotos>> response) {
+                if (response.isSuccessful()){
+                    listaDeFotos = response.body();
 
-                if( response.isSuccessful()){
-                    CEP cep = response.body();
-                    textoResultado.setText( cep.getLogradouro()+" / "+cep.getComplemento()+" / "+
-                                            cep.getBairro()+" / "+cep.getLocalidade()+" / "+cep.getUf());
+                    for (int i=0; i<listaDeFotos.size();i++){
+                        Fotos fotos = listaDeFotos.get(i);
+                        Log.d("resultado","resultado"+ fotos.getId()+ " / " + fotos.getTitle());
+                    }
                 }
             }
 
             @Override
-            public void onFailure(Call<CEP> call, Throwable t) {
+            public void onFailure(Call<List<Fotos>> call, Throwable t) {
 
             }
         });
-    }
 
+    }
 }
