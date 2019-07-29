@@ -22,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Button botaoRecuperar;
     private TextView textoResultado;
+    private TextView cepDigitado;
 
 
     @Override
@@ -29,22 +30,43 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         botaoRecuperar = findViewById(R.id.button_recuperar);
         textoResultado = findViewById(R.id.textResultado);
+        cepDigitado = findViewById(R.id.cepDigitado_id);
 
         botaoRecuperar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MyTask task = new MyTask();
 
-                String UrlApi = "https://www.blockchain.com/ticker";
-                String cep = "03421000";
-                String urlCep = "https://viacep.com.br/ws/"+ cep +"/json";
-                task.execute(urlCep);
-
+                validarCep(cepDigitado);
             }
+
         });
 
+    }
+
+    public void validarCep(View view){
+
+        String validaCep = cepDigitado.getText().toString();
+
+
+        if (cepDigitado.equals("")){
+            textoResultado.setText("Preecha o cep corretamente\n Exemplo 00000000\n não use caracteres nem espaços");
+
+        }else{
+            buscarCep(cepDigitado);
+        }
+
+    }
+
+    private void buscarCep(TextView cepDigitado) {
+        MyTask task = new MyTask();
+
+        String UrlApi = "https://www.blockchain.com/ticker";
+        String cep = cepDigitado.getText().toString();
+        String urlCep = "https://viacep.com.br/ws/"+ cep +"/json";
+        task.execute(urlCep);
     }
 
     class MyTask extends AsyncTask<String,Void, String>{
@@ -80,9 +102,6 @@ public class MainActivity extends AppCompatActivity {
                 while ( (linha = reader.readLine()) !=null){
                     buffer.append(linha);
                 }
-
-
-
 
             } catch (MalformedURLException e) {
                 e.printStackTrace();
@@ -123,4 +142,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
+
+
+
 }
