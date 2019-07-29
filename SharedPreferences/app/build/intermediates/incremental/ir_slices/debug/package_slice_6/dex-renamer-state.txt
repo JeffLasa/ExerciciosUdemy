@@ -1,0 +1,4 @@
+#Mon Jul 29 16:54:32 BRT 2019
+base.0=C\:\\Users\\Jefferson\\OneDrive\\DEV\\UDEMY\\SharedPreferences\\app\\build\\intermediates\\transforms\\dexMerger\\debug\\6
+path.0=classes.dex
+renamed.0=classes.dex
