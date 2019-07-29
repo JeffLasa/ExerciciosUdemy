@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
         String validaCep = cepDigitado.getText().toString();
 
 
-        if (cepDigitado.equals("")){
+        if (validaCep.equals("")){
             textoResultado.setText("Preecha o cep corretamente\n Exemplo 00000000\n não use caracteres nem espaços");
 
         }else{
