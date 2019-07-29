@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Button botaoRecuperar;
     private TextView textoResultado;
+    private TextView cepInputText;
     private  Retrofit retrofit;
 
 
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
         botaoRecuperar = findViewById(R.id.button_recuperar);
         textoResultado = findViewById(R.id.textResultado);
+        cepInputText = findViewById(R.id.cep_input_edit_text_id);
 
         retrofit = new Retrofit.Builder()
                 .baseUrl("https://viacep.com.br/ws/")
@@ -58,8 +60,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void recuperarCepRetrofit() {
 
+        String cep = cepInputText.getText().toString();
         CepService cepService = retrofit.create ( CepService.class );
-        Call<CEP> call = cepService.recuperarCep("03421000");
+        Call<CEP> call = cepService.recuperarCep(cep);
 
         call.enqueue(new Callback<CEP>() {
             @Override
